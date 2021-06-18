@@ -45,8 +45,8 @@ def report_classification(X_few, y_test, y_pred, model, alpha=None):
         print('=='*30)
 
 def start():
-    df_clean = pd.read_pickle('saved_objects\\df_clean_2.pkl')
-    with open('saved_objects\\doc_top.pkl', 'rb') as f:
+    df_clean = pd.read_pickle('saved_objects/df_clean_2.pkl')
+    with open('saved_objects/doc_top.pkl', 'rb') as f:
         doc_top = pickle.load(f)
     X_train, X_test, y_train, y_test, X_few = prepare_data_for_sklearn(df_clean, doc_top)
     

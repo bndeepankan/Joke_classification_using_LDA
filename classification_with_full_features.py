@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
 
+
 def prepare_data_for_sklearn(df_clean):
     bows = CountVectorizer()
     X = bows.fit_transform(df_clean.jokes_text) # create document term matrix  
@@ -19,10 +20,12 @@ def prepare_data_for_sklearn(df_clean):
     
     return X
 
+
 def train_and_predict_data(X_train, X_test, y_train, y_test, model):
     model.fit(X_train, y_train) # train model
     y_pred = model.predict(X_test)
     return y_pred
+
 
 def report_classification(X, y_test, y_pred, model, alpha=None):
     if isinstance(model, LogisticRegression):
@@ -59,10 +62,9 @@ def start():
 
 
 if __name__ == 'classification_with_full_features':
-    df_clean = pd.read_pickle('saved_objects\\df_clean_2.pkl')
+    df_clean = pd.read_pickle('saved_objects/df_clean_2.pkl')
     X = prepare_data_for_sklearn(df_clean)
     y = df_clean.label #label 
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.3) # 30 percent for testing
 
-    

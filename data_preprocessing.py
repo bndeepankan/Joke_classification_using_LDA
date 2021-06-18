@@ -40,6 +40,7 @@ def read_jokes(jokes_list):
                 df_raw = pd.concat([df_raw, df_temp], ignore_index=True)
     return df_raw
 
+
 def get_pos(token):
     # get pos of a token. It will be used in lemmatization process
     pos = pos_tag([token])[0][1][0]
@@ -51,6 +52,7 @@ def get_pos(token):
         return wordnet.ADV
     else:
         return wordnet.NOUN
+
 
 def preprocess(text):
     stop_words = stopwords.words('english')
@@ -66,14 +68,23 @@ def preprocess(text):
     tokens = [token for token in tokens if len(token)>2]
     return tokens
 
+
 #convert list of tokens to the string
 def tokens_to_sents(tokens): 
     return ' '.join(tokens)
+
 
 def noun_adj(text):
     # Keep only nouns and adjectives
     text = [token for (token, pos) in pos_tag(text) if ( pos[:2]=='NN' or pos[:2] == 'JJ')]
     return text 
+
+
+def tag_text(text):
+    text = word_tokenize(text)
+    text = [(token, pos) for (token, pos) in pos_tag(text)]
+    return text
+
 
 df_raw = read_jokes(jokes_list)
 df_raw.rename({0: 'jokes_text'}, axis=1, inplace=True) #change column names to 'jokes_text'
@@ -91,8 +102,8 @@ df_clean['label'] = df_raw['label'] # add 'label' column
 
 # read each file to the dataframe such that row of a dataframe corresponds to one document
 data = {} 
-for i, f in enumerate(os.listdir('jokes\\')):
-    with open('jokes\\'+f, mode ='r', encoding='utf-8') as f_obj:
+for i, f in enumerate(os.listdir('jokes/')):
+    with open('jokes/'+f, mode ='r', encoding='utf-8') as f_obj:
         data[jokes_list[i]] = [f_obj.read()]
 
 data_for_lda = pd.DataFrame(data).T
@@ -102,5 +113,5 @@ data_for_lda = pd.DataFrame(data_for_lda.apply(noun_adj)) #keep only nouns and a
 data_for_lda = pd.DataFrame(data_for_lda)
 
 #Save the dataframes:
-df_clean.to_pickle('saved_objects\\df_clean.pkl') # it will be used in classification
-data_for_lda.to_pickle('saved_objects\\data_for_lda.pkl') # it will be used for topic extraction
+df_clean.to_pickle('saved_objects/df_clean.pkl') # it will be used in classification
+data_for_lda.to_pickle('saved_objects/data_for_lda.pkl') # it will be used for topic extraction

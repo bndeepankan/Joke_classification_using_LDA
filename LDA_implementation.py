@@ -10,6 +10,7 @@ import re
 import pandas as pd
 import pickle
 import numpy as np
+from data_preprocessing import tag_text
 
 
 def train_lda(data_for_lda, number_topics, seed=None):
@@ -19,6 +20,7 @@ def train_lda(data_for_lda, number_topics, seed=None):
     np.random.seed(seed)
     lda = models.LdaModel(corpus, num_topics=number_topics, id2word=dct, passes=10)
     return lda
+
 
 def extract_top_words(lda, number_words):
     from data_preprocessing import tokens_to_sents
@@ -30,19 +32,30 @@ def extract_top_words(lda, number_words):
         doc_top.append(tokens_to_sents(tokens))
     return doc_top
 
+
 def run_lda(number_topics, number_words, seed):
-    data_for_lda = pd.read_pickle('saved_objects\\data_for_lda.pkl')
+    data_for_lda = pd.read_pickle('saved_objects/data_for_lda.pkl')
     lda = train_lda(data_for_lda, number_topics, seed)
     doc_top = extract_top_words(lda, number_words)
-    with open('saved_objects\\doc_top.pkl', 'wb') as f:
+    with open('saved_objects/doc_top.pkl', 'wb') as f:
         pickle.dump(doc_top, f)
-    print('Topics generation finished and saved in \\saved_objects\\doc_top.pkl')
-    #print(doc_top)
+    print('Topics generation finished and saved in /saved_objects/doc_top.pkl')
+    word_list = print_keyword(doc_top)
+    return word_list
 
 
-
-
-
-
-
-    
+def print_keyword(doc_top):
+    """
+    :param doc_top: contains keywords based on LDA
+    :return: keywords based on nouns, verbs etc.
+    """
+    wordList = {}
+    for tp in range(len(doc_top)):
+        text = tag_text(doc_top[tp])
+        for keyword, tag in text:
+            try:
+                wordList[tag].add(keyword)
+            except:
+                wordList[tag] = {keyword}
+    # print(wordList)
+    return wordList
