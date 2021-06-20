@@ -29,8 +29,6 @@ if __name__ == '__main__':
     word_category = topicCategories(obj_lda.doc_top)
     # print(countWords(word_category))
     obj_con = Consensus(word_category)
-
-
     start_cwfl = time.time()
     cwfl.start()
     end_cwfl = time.time()
