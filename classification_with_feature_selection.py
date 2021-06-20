@@ -27,10 +27,12 @@ def prepare_data_for_sklearn(df_clean, doc_top):
     y_test_few = y_test
     return X_train_few, X_test_few, y_train_few, y_test_few, X_few
 
+
 def train_and_predict_data(X_train, X_test, y_train, y_test, model):
     model.fit(X_train, y_train) # train model
     y_pred = model.predict(X_test)
     return y_pred
+
 
 def report_classification(X_few, y_test, y_pred, model, alpha=None):
     if isinstance(model, LogisticRegression):
@@ -43,6 +45,7 @@ def report_classification(X_few, y_test, y_pred, model, alpha=None):
         print('Report of Multinomial Naive Bayes with best the hyperparameter alpha={:.1f}'.format(alpha))
         print(metrics.classification_report(y_test, y_pred))
         print('=='*30)
+
 
 def start():
     df_clean = pd.read_pickle('saved_objects/df_clean_2.pkl')

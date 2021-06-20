@@ -53,7 +53,7 @@ def start():
     mnb = MultinomialNB()
     param_grid = {'alpha':[0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]}
     mnb = MultinomialNB()
-    grid = GridSearchCV(mnb, param_grid, scoring='accuracy', cv=10) #use grid search to find best hyperparameter
+    grid = GridSearchCV(mnb, param_grid, scoring='accuracy', cv=10) # use grid search to find best hyperparameter
     grid.fit(X, y)
     
     mnb = MultinomialNB(alpha=grid.best_params_['alpha'])
