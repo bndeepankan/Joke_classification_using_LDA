@@ -64,7 +64,5 @@ def start():
 if __name__ == 'classification_with_full_features':
     df_clean = pd.read_pickle('saved_objects/df_clean_2.pkl')
     X = prepare_data_for_sklearn(df_clean)
-    y = df_clean.label #label 
-    
+    y = df_clean.label #label
     X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.3) # 30 percent for testing
-

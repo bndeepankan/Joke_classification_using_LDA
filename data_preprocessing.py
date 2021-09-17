@@ -12,6 +12,7 @@ from nltk.corpus import wordnet
 import pandas as pd
 import re
 import os
+from sklearn.model_selection import train_test_split
 
 
 class dataPreprocess():
@@ -19,16 +20,17 @@ class dataPreprocess():
     def __init__(self):
 
         self.jokes_list = ['animal', 'blonde', 'boycott', 'clean', 'family', 'food', 'holiday', 'insult', 'national',
-                      'office', 'political', 'relationship', 'religious', 'school', 'science', 'sex', 'sexist', 'sports',
-                      'technology']
+                           'office', 'political', 'relationship', 'religious', 'school', 'science', 'sex', 'sexist',
+                           'sports',
+                           'technology']
         self.categories = {'animal': 'other', 'blonde': 'family_related', 'boycott': 'family_related',
-                                            'clean': 'family_related', 'family': 'family_related',
-                                            'food': 'family_related', 'holiday': 'other',
-                                            'insult': 'family_related', 'national': 'other', 'office': 'family_related',
-                                            'political': 'other', 'relationship': 'family_related',
-                                            'religious': 'other',
-                                            'school': 'family_related', 'science': 'other', 'sex': 'family_related',
-                                            'sexist': 'family_related', 'sports': 'other', 'technology': 'other'}
+                           'clean': 'family_related', 'family': 'family_related',
+                           'food': 'family_related', 'holiday': 'other',
+                           'insult': 'family_related', 'national': 'other', 'office': 'family_related',
+                           'political': 'other', 'relationship': 'family_related',
+                           'religious': 'other',
+                           'school': 'family_related', 'science': 'other', 'sex': 'family_related',
+                           'sexist': 'family_related', 'sports': 'other', 'technology': 'other'}
 
     # Start the process of data preprocessing
     def start(self):
@@ -41,6 +43,11 @@ class dataPreprocess():
         self.df_clean = pd.DataFrame(self.df_clean)  # convert to df
 
         self.df_clean['label'] = self.df_raw['label']  # add 'label' column
+        y = self.df_clean['label']
+        x = self.df_clean['jokes_text']
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+        df_train = pd.DataFrame(list(zip(x_train, y_train)), columns=['jokes_text', 'label'])
+        df_test = pd.DataFrame(list(zip(x_test, y_test)), columns=['jokes_text', 'label'])
 
         # read each file to the dataframe such that row of a dataframe corresponds to one document
         data = {}
@@ -57,26 +64,29 @@ class dataPreprocess():
         # Save the dataframes:
         self.df_clean.to_pickle('saved_objects/df_clean.pkl')  # it will be used in classification
         data_for_lda.to_pickle('saved_objects/data_for_lda.pkl')  # it will be used for topic extraction
+        df_train.to_pickle('saved_objects/df_train.pkl') # used for training purposes
+        df_test.to_pickle('saved_objects/df_test.pkl') # used for testing purposes
 
     # read jokes and store them in a dataframe.In a document each jokes starts with a number
     def read_jokes(self, jokes_list):
         for joke in jokes_list:
-            with open('jokes/'+ joke +'-jokes.txt', encoding='utf-8') as f: #jokes folder where all joke documents are there
+            with open('jokes/' + joke + '-jokes.txt',
+                      encoding='utf-8') as f:  # jokes folder where all joke documents are there
                 jokes = []
-                new_joke=''
+                new_joke = ''
                 for line in f:
-                    found = re.findall(r'^(\d+\.)', line) # if line starts with digits then it is a new joke
-                    if len(found) > 0: #new joke is found, add previous joke to the list
+                    found = re.findall(r'^(\d+\.)', line)  # if line starts with digits then it is a new joke
+                    if len(found) > 0:  # new joke is found, add previous joke to the list
                         jokes.append(new_joke)
                         new_joke = ''
                         new_joke = new_joke + line
                     else:
                         new_joke = new_joke + line
                 jokes.remove('')
-                if joke == 'animal': #if it is first file just create Dataframe. 'animal-jokes.txt' is the first file
+                if joke == 'animal':  # if it is first file just create Dataframe. 'animal-jokes.txt' is the first file
                     df_raw = pd.DataFrame(jokes)
                     df_raw['label'] = joke
-                else:                # if it is not first file then concat dataframes
+                else:  # if it is not first file then concat dataframes
                     df_temp = pd.DataFrame(jokes)
                     df_temp['label'] = joke
                     df_raw = pd.concat([df_raw, df_temp], ignore_index=True)
@@ -96,16 +106,18 @@ class dataPreprocess():
 
     def preprocess(self, text):
         stop_words = stopwords.words('english')
-        new_stop_words = ['say', 'ask', 'tell', 'get','come', 'see', 'asks', 'go','know', 'look', 'first','second',
-                      'walk','see','one', 'two', 'reply', 'like', 'make', 'back','would','man']
+        new_stop_words = ['say', 'ask', 'tell', 'get', 'come', 'see', 'asks', 'go', 'know', 'look', 'first', 'second',
+                          'walk', 'see', 'one', 'two', 'reply', 'like', 'make', 'back', 'would', 'man']
         stop_words = stop_words + new_stop_words
         wnl = WordNetLemmatizer()
-        text = text.lower() #make lowercase
+        text = text.lower()  # make lowercase
         tokens = word_tokenize(text)
-        tokens = [token for token in tokens if token.isalpha()] #if a token is not a digit or not contains any digits then add
-        tokens = [wnl.lemmatize(token, self.get_pos(token)) for token in tokens] # lemmatize a token taken into account its pos tag
-        tokens = [token for token in tokens if token not in stop_words] #remove stopwords
-        tokens = [token for token in tokens if len(token)>2]
+        tokens = [token for token in tokens if
+                  token.isalpha()]  # if a token is not a digit or not contains any digits then add
+        tokens = [wnl.lemmatize(token, self.get_pos(token)) for token in
+                  tokens]  # lemmatize a token taken into account its pos tag
+        tokens = [token for token in tokens if token not in stop_words]  # remove stopwords
+        tokens = [token for token in tokens if len(token) > 2]
         return tokens
 
     # convert list of tokens to the string
@@ -114,7 +126,7 @@ class dataPreprocess():
 
     def noun_adj(self, text):
         # Keep only nouns and adjectives
-        text = [token for (token, pos) in pos_tag(text) if ( pos[:2]=='NN' or pos[:2] == 'JJ')]
+        text = [token for (token, pos) in pos_tag(text) if (pos[:2] == 'NN' or pos[:2] == 'JJ')]
         return text
 
     def tag_text(self, text):
@@ -124,6 +136,5 @@ class dataPreprocess():
 
 
 if __name__ == '__main__':
-
     obj = dataPreprocess()
     obj.start()
